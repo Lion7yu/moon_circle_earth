@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+    }
+
+    canvas {
+      background-image: url("../libs/images/Background.jpg");
+      background-size: cover;
+    }
+
+    .label {
+      color: #fff;
+      font-size: 14px;
+    }
+  </style>
+  <script src="../libs/Three/node_modules/three/build/three.js"></script>
+  <script src="../libs/Three/node_modules/three/examples/js/controls/OrbitControls.js"></script>
+  <script src="../libs/Three/node_modules/three/examples/js/renderers/CSS2DRenderer.js"></script>
+</head>
+
+<body>
+  <script>
+    // 声明全局变量
+    let camera, scene, renderer, labelRenderer
+    let Moon, Earth
+    let clock = new THREE.Clock()
+    //实例化纹理加载器
+    const textureLoader = new THREE.TextureLoader()
+
+    function init() {
+      //地球，月球半径大小
+      const EARTH_RADIUS = 2.5
+      const MOON_RADIUS = 0.27
+
+      //实例化相机
+      camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 200)
+      camera.position.set(10, 5, 20)
+
+      //实例化场景
+      scene = new THREE.Scene()
+      //创建聚光灯
+      const spotLight = new THREE.SpotLight(0xffffff)
+      spotLight.position.set(0, 0, 10)
+      spotLight.intensity = 2
+      spotLight.castShadow = true
+      scene.add(spotLight)
+
+      // 添加环境光
+      const aLight = new THREE.AmbientLight(0xffffff)
+      aLight.intensity = 0.3
+      scene.add(aLight)
+
+      //创建月球
+      const moonGeometry = new THREE.SphereGeometry(MOON_RADIUS, 16, 16)
+      const moonMaterial = new THREE.MeshPhongMaterial({
+        map: textureLoader.load('../libs/images/Moon.jpg')
+      })
+
+      Moon = new THREE.Mesh(moonGeometry, moonMaterial)
+      Moon.receiveShadow = true
+      Moon.castShadow = true
+      scene.add(Moon)
+
+      const moonDiv = document.createElement('div')
+      moonDiv.className = 'label'
+      moonDiv.textContent = 'Moon'
+      const moonLabel = new THREE.CSS2DObject(moonDiv)
+      moonLabel.position.set(0, -MOON_RADIUS - 0.5, 0)
+      Moon.add(moonLabel)
+
+
+      //创建地球
+      const earthGeometry = new THREE.SphereGeometry(EARTH_RADIUS, 16, 16)
+      const earthMaterial = new THREE.MeshPhongMaterial({
+        shininess: 5,
+        map: textureLoader.load('../libs/images/Earth.jpg'),
+        specularMap: textureLoader.load('../libs/images/Earth-specular.jpg'),
+        normalMap: textureLoader.load('../libs/images/Earth-normal.jpg')
+      })
+      Earth = new THREE.Mesh(earthGeometry, earthMaterial)
+      Earth.receiveShadow = true
+      Earth.castShadow = true
+      scene.add(Earth)
+
+      const earthDiv = document.createElement('div')
+      earthDiv.className = 'label'
+      earthDiv.textContent = 'Earth'
+      const earthLabel = new THREE.CSS2DObject(earthDiv)
+      earthLabel.position.set(0, -EARTH_RADIUS - 1, 0)
+      Earth.add(earthLabel)
+
+      //创建渲染器
+      renderer = new THREE.WebGLRenderer({
+        alpha: true
+      })
+      renderer.setPixelRatio(window.devicePixelRatio)
+      renderer.setSize(window.innerWidth, window.innerHeight)
+
+      //渲染阴影
+      renderer.shadowMap.enabled = true
+      document.body.appendChild(renderer.domElement)
+
+      //标签渲染器
+      labelRenderer = new THREE.CSS2DRenderer()
+      labelRenderer.setSize(window.innerWidth, window.innerHeight)
+      labelRenderer.domElement.style.position = 'absolute'
+      labelRenderer.domElement.style.bottom = '0px'
+      document.body.appendChild(labelRenderer.domElement)
+
+
+      //绑定控制器和镜头
+      const controls = new THREE.OrbitControls(camera, renderer.domElement)
+      controls.addEventListener('change', () => {
+        renderer.render(scene, camera)
+      })
+    }
+
+    let oldTime = 0
+    //渲染函数
+    function animate() {
+      const elapsed = clock.getElapsedTime()
+      Moon.position.set(Math.sin(elapsed) * 4, 0, Math.cos(elapsed) * 4)
+
+      //地球自转
+      const axis = new THREE.Vector3(0, 1, 0)
+      Earth.rotateOnAxis(axis, (elapsed - oldTime) * Math.PI / 30)
+      renderer.render(scene, camera)
+      labelRenderer.render(scene, camera)
+      oldTime = elapsed
+      requestAnimationFrame(animate)
+    }
+
+    init()
+    animate()
+
+    //动态调整尺寸
+    window.onresize = function () {
+      camera.aspect = window.innerWidth / window.innerh
+      camera.updateProjectionMatrix()
+      renderer.setSize(window.innerWidth, window.innerHeight)
+    }
+  </script>
+</body>
+
+</html>
