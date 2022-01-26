@@ -13,7 +13,7 @@
     }
 
     canvas {
-      background-image: url("../libs/images/Background.jpg");
+      background-image: url("./libs/images/Background.jpg");
       background-size: cover;
     }
 
@@ -62,7 +62,7 @@
       //创建月球
       const moonGeometry = new THREE.SphereGeometry(MOON_RADIUS, 16, 16)
       const moonMaterial = new THREE.MeshPhongMaterial({
-        map: textureLoader.load('../libs/images/Moon.jpg')
+        map: textureLoader.load('./libs/images/Moon.jpg')
       })
 
       Moon = new THREE.Mesh(moonGeometry, moonMaterial)
@@ -82,9 +82,9 @@
       const earthGeometry = new THREE.SphereGeometry(EARTH_RADIUS, 16, 16)
       const earthMaterial = new THREE.MeshPhongMaterial({
         shininess: 5,
-        map: textureLoader.load('../libs/images/Earth.jpg'),
-        specularMap: textureLoader.load('../libs/images/Earth-specular.jpg'),
-        normalMap: textureLoader.load('../libs/images/Earth-normal.jpg')
+        map: textureLoader.load('./libs/images/Earth.jpg'),
+        specularMap: textureLoader.load('./libs/images/Earth-specular.jpg'),
+        normalMap: textureLoader.load('./libs/images/Earth-normal.jpg')
       })
       Earth = new THREE.Mesh(earthGeometry, earthMaterial)
       Earth.receiveShadow = true
